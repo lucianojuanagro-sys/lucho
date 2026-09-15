@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Libro de Caja</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #ECE6D6;
+    --paper-2: #E3DBC6;
+    --rule: #C3B79A;
+    --ink: #2B2620;
+    --ink-soft: #766D5C;
+    --navy: #1F2A3D;
+    --navy-2: #162030;
+    --green: #2F5D4C;
+    --green-soft: #DCE7DF;
+    --red: #8B3A3A;
+    --red-soft: #EFDEDA;
+    --white: #FBF9F3;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Inter', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 480px;
+    min-height: 100vh;
+    background: var(--paper);
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ---- Header ---- */
+  header {
+    background: linear-gradient(180deg, var(--navy) 0%, var(--navy-2) 100%);
+    color: var(--white);
+    padding: 28px 24px 24px;
+    position: relative;
+  }
+
+  header::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: -10px;
+    height: 10px;
+    background: repeating-linear-gradient(90deg, transparent 0 6px, rgba(0,0,0,0.12) 6px 7px);
+  }
+
+  .brand {
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    letter-spacing: 0.03em;
+    color: #C7CEDA;
+    margin: 0 0 14px;
+    font-weight: 500;
+  }
+
+  .saldo-label {
+    font-size: 13px;
+    color: #9AA5B8;
+    margin: 0 0 2px;
+  }
+
+  .saldo-valor {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 42px;
+    line-height: 1.05;
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .saldo-valor.neg { color: #E3A9A0; }
+
+  /* ---- Form card ---- */
+  main {
+    flex: 1;
+    padding: 22px 22px 12px;
+  }
+
+  .campo {
+    margin-bottom: 20px;
+  }
+
+  .campo-titulo {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin: 0 0 8px;
+    font-weight: 600;
+  }
+
+  .par-botones {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .toggle-btn {
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    padding: 14px 10px;
+    border-radius: 10px;
+    border: 1.5px solid var(--rule);
+    background: var(--white);
+    color: var(--ink);
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    min-height: 52px;
+  }
+
+  .toggle-btn.usuario.selected {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: var(--white);
+  }
+
+  .toggle-btn.ingreso.selected {
+    background: var(--green);
+    border-color: var(--green);
+    color: var(--white);
+  }
+
+  .toggle-btn.egreso.selected {
+    background: var(--red);
+    border-color: var(--red);
+    color: var(--white);
+  }
+
+  input[type="date"],
+  input[type="number"],
+  input[type="text"] {
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+    font-size: 17px;
+    padding: 13px 14px;
+    border-radius: 10px;
+    border: 1.5px solid var(--rule);
+    background: var(--white);
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  input:focus {
+    outline: none;
+    border-color: var(--navy);
+  }
+
+  .guardar {
+    width: 100%;
+    padding: 16px;
+    margin-top: 6px;
+    border-radius: 10px;
+    border: none;
+    background: var(--ink);
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 54px;
+  }
+
+  .guardar:disabled {
+    opacity: 0.55;
+  }
+
+  .estado {
+    text-align: center;
+    font-size: 13px;
+    margin-top: 10px;
+    min-height: 18px;
+    color: var(--ink-soft);
+  }
+
+  .estado.error { color: var(--red); }
+  .estado.ok { color: var(--green); }
+
+  /* ---- Movimientos ---- */
+  .movimientos {
+    padding: 4px 22px 32px;
+  }
+
+  .movimientos-titulo {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 18px 0 10px;
+    border-bottom: 1.5px solid var(--rule);
+    padding-bottom: 8px;
+  }
+
+  .fila {
+    display: grid;
+    grid-template-columns: 52px 1fr auto;
+    gap: 10px;
+    align-items: center;
+    padding: 11px 0;
+    border-bottom: 1px dashed var(--rule);
+  }
+
+  .fila-fecha {
+    font-size: 12px;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .fila-detalle {
+    font-size: 14.5px;
+    line-height: 1.3;
+  }
+
+  .fila-usuario {
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+
+  .fila-monto {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 15px;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .fila-monto.ingreso { color: var(--green); }
+  .fila-monto.egreso { color: var(--red); }
+
+  .vacio {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 14px;
+    padding: 24px 0;
+  }
+
+  .config-aviso {
+    margin: 16px 22px;
+    padding: 14px 16px;
+    background: var(--red-soft);
+    border: 1px solid var(--red);
+    border-radius: 10px;
+    font-size: 13px;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+
+  .config-aviso code {
+    background: rgba(0,0,0,0.06);
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 12px;
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+  <header>
+    <p class="brand">Libro de Caja &middot; Lucas &amp; Lorena</p>
+    <p class="saldo-label">Saldo actual</p>
+    <p class="saldo-valor" id="saldoValor">$ &mdash;</p>
+  </header>
+
+  <div id="configAviso" class="config-aviso" style="display:none;">
+    Falta conectar la app a tu planilla: reemplazá <code>APPS_SCRIPT_URL</code> en el
+    archivo por la URL de tu Apps Script publicado. Mirá las instrucciones de configuración.
+  </div>
+
+  <main>
+    <form id="formMovimiento">
+      <div class="campo">
+        <p class="campo-titulo">¿Quién carga?</p>
+        <div class="par-botones" id="grupoUsuario">
+          <button type="button" class="toggle-btn usuario" data-valor="Lucas">Lucas</button>
+          <button type="button" class="toggle-btn usuario" data-valor="Lorena">Lorena</button>
+        </div>
+      </div>
+
+      <div class="campo">
+        <p class="campo-titulo">Tipo de movimiento</p>
+        <div class="par-botones" id="grupoTipo">
+          <button type="button" class="toggle-btn ingreso" data-valor="Ingreso">Ingreso</button>
+          <button type="button" class="toggle-btn egreso" data-valor="Egreso">Egreso</button>
+        </div>
+      </div>
+
+      <div class="campo">
+        <p class="campo-titulo">Fecha</p>
+        <input type="date" id="fecha" required>
+      </div>
+
+      <div class="campo">
+        <p class="campo-titulo">Monto</p>
+        <input type="number" id="monto" inputmode="decimal" placeholder="0" min="0" step="0.01" required>
+      </div>
+
+      <div class="campo">
+        <p class="campo-titulo">Detalle</p>
+        <input type="text" id="detalle" placeholder="Ej: Supermercado, sueldo, alquiler..." required>
+      </div>
+
+      <button type="submit" class="guardar" id="btnGuardar">Guardar movimiento</button>
+      <p class="estado" id="estado"></p>
+    </form>
+  </main>
+
+  <div class="movimientos">
+    <p class="movimientos-titulo">Últimos movimientos</p>
+    <div id="listaMovimientos">
+      <p class="vacio">Todavía no hay movimientos cargados.</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ============================================================
+  // Pegá acá la URL de tu Apps Script publicado (ver instrucciones)
+  // Ejemplo: "https://script.google.com/macros/s/AKfycb.../exec"
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwIN8bf-VqtlERstIyxzNFN5f35zw9AAUvR45uScyaupzmAuqZXk6_Nkj4INBxdgRQM/exec";
+  // ============================================================
+
+  const formatoMoneda = (n) => {
+    const num = Number(n) || 0;
+    return num.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
+  };
+
+  const formatoFechaCorta = (fechaStr) => {
+    if (!fechaStr) return '';
+    const partes = String(fechaStr).split(/[-T]/);
+    if (partes.length < 3) return fechaStr;
+    const [anio, mes, dia] = partes;
+    const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    return `${dia} ${meses[parseInt(mes, 10) - 1] || ''}`;
+  };
+
+  let usuarioSel = null;
+  let tipoSel = null;
+
+  const grupoUsuario = document.getElementById('grupoUsuario');
+  const grupoTipo = document.getElementById('grupoTipo');
+  const fechaInput = document.getElementById('fecha');
+  const estadoEl = document.getElementById('estado');
+  const btnGuardar = document.getElementById('btnGuardar');
+  const saldoValorEl = document.getElementById('saldoValor');
+  const listaEl = document.getElementById('listaMovimientos');
+  const configAviso = document.getElementById('configAviso');
+
+  fechaInput.valueAsDate = new Date();
+
+  if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === "APPS_SCRIPT_URL") {
+    configAviso.style.display = 'block';
+  }
+
+  function seleccionar(grupo, boton, guardarEn) {
+    grupo.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('selected'));
+    boton.classList.add('selected');
+    return boton.dataset.valor;
+  }
+
+  grupoUsuario.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => { usuarioSel = seleccionar(grupoUsuario, btn); });
+  });
+
+  grupoTipo.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => { tipoSel = seleccionar(grupoTipo, btn); });
+  });
+
+  function pintarSaldo(saldo) {
+    const n = Number(saldo) || 0;
+    saldoValorEl.textContent = formatoMoneda(n);
+    saldoValorEl.classList.toggle('neg', n < 0);
+  }
+
+  function pintarMovimientos(rows) {
+    if (!rows || rows.length === 0) {
+      listaEl.innerHTML = '<p class="vacio">Todavía no hay movimientos cargados.</p>';
+      return;
+    }
+    listaEl.innerHTML = rows.map(fila => {
+      const [fecha, usuario, tipo, detalle, monto] = fila;
+      const esIngreso = String(tipo).toLowerCase() === 'ingreso';
+      const signo = esIngreso ? '+' : '-';
+      return `
+        <div class="fila">
+          <div class="fila-fecha">${formatoFechaCorta(fecha)}</div>
+          <div>
+            <div class="fila-detalle">${detalle || ''}</div>
+            <div class="fila-usuario">${usuario || ''}</div>
+          </div>
+          <div class="fila-monto ${esIngreso ? 'ingreso' : 'egreso'}">${signo} ${formatoMoneda(Math.abs(Number(monto) || 0))}</div>
+        </div>`;
+    }).join('');
+  }
+
+  async function cargarDatos() {
+    if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === "APPS_SCRIPT_URL") return;
+    try {
+      const resp = await fetch(APPS_SCRIPT_URL);
+      const data = await resp.json();
+      pintarSaldo(data.saldo);
+      pintarMovimientos(data.rows);
+    } catch (err) {
+      estadoEl.textContent = 'No se pudieron cargar los datos de la planilla.';
+      estadoEl.className = 'estado error';
+    }
+  }
+
+  document.getElementById('formMovimiento').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    estadoEl.textContent = '';
+    estadoEl.className = 'estado';
+
+    if (!usuarioSel) { estadoEl.textContent = 'Elegí quién carga el movimiento.'; estadoEl.className = 'estado error'; return; }
+    if (!tipoSel) { estadoEl.textContent = 'Elegí si es un ingreso o un egreso.'; estadoEl.className = 'estado error'; return; }
+    if (!APPS_SCRIPT_URL || APPS_SCRIPT_URL === "APPS_SCRIPT_URL") {
+      estadoEl.textContent = 'Falta configurar la conexión con la planilla.'; estadoEl.className = 'estado error'; return;
+    }
+
+    const payload = {
+      fecha: fechaInput.value,
+      usuario: usuarioSel,
+      tipo: tipoSel,
+      detalle: document.getElementById('detalle').value,
+      monto: document.getElementById('monto').value
+    };
+
+    btnGuardar.disabled = true;
+    btnGuardar.textContent = 'Guardando...';
+
+    try {
+      const resp = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      const data = await resp.json();
+
+      if (data.ok) {
+        estadoEl.textContent = 'Movimiento guardado.';
+        estadoEl.className = 'estado ok';
+        document.getElementById('detalle').value = '';
+        document.getElementById('monto').value = '';
+        await cargarDatos();
+      } else {
+        throw new Error('respuesta sin ok');
+      }
+    } catch (err) {
+      estadoEl.textContent = 'No se pudo guardar. Revisá tu conexión.';
+      estadoEl.className = 'estado error';
+    } finally {
+      btnGuardar.disabled = false;
+      btnGuardar.textContent = 'Guardar movimiento';
+    }
+  });
+
+  cargarDatos();
+</script>
+
+</body>
+</html>
